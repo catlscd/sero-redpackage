@@ -1,0 +1,27 @@
+.DS_Store
+node_modules
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+contracts/combined.json
+contracts/deploy.js
+contracts/HashID.sol
+TestHashID.sol
+contracts/*.py
+contracts/*.js
+*.js.map

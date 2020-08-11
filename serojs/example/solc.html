@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="https://solc-bin.ethereum.org/bin/soljson-latest.js"></script>
+    <script type="text/javascript">
+        var wrapper = require('solc')
+        var solc = wrapper(window.Module)
+    </script>
+</head>
+<body>
+<h1>contract</h1>
+<div id='create'>
+    <button type="button" onClick="createExampleContract();">create example contract</button>
+</div>
+<div id="result"></div>
+</body>
+</html>
+
