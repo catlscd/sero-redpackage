@@ -1,6 +1,7 @@
 <template>
   <!-- 红包详情页 -->
   <div id="detail">
+    <b-overlay :show="loadding" no-wrap> </b-overlay>
     <img src="../assets/detail-bg.png" class="img-fluid" alt="" />
     <b-container>
       <div class="info">
@@ -134,6 +135,7 @@ export default {
             typ: detail.typ,
             created: detail.created,
           };
+          this.loadding = false;
         }
       );
     },
@@ -212,8 +214,6 @@ export default {
       code: this.$route.query.code,
       txhash: this.$route.query.txhash,
       from: this.$route.query.from,
-      // from: "grabPackage",
-      // txhash:"0x67c8c55e7f6f503ad17ad044dff42889f3aba21db9601b34d6c7307c9d186098",
       txStatus: "0x0",
       openList: [],
       getMoney: 0,
@@ -227,6 +227,7 @@ export default {
         remainAmount: "",
         typ: "",
       },
+      loadding: true,
     };
   },
   destroyed() {
