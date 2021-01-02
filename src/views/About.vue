@@ -13,7 +13,7 @@
     </p>
 
     <div v-if="showAddToken">
-      <b-form @submit.prevent="addToken">
+      <b-form>
         <b-form-group label="Token" description="如：SERO">
           <b-form-input v-model="token.currency"></b-form-input>
         </b-form-group>
@@ -41,7 +41,7 @@
         <b-form-group label="排序" description="越大越靠前">
           <b-form-input v-model="token.weight" type="number"></b-form-input>
         </b-form-group>
-        <b-button type="submit" size="sm" variant="primary">
+        <b-button type="submit" size="sm" variant="primary" @click="addToken">
           添加 Token
         </b-button>
       </b-form>
@@ -116,9 +116,7 @@ export default {
         this.showAddToken = true;
       }
     },
-    addToken(evt) {
-      evt.preventDefault();
-
+    addToken() {
       let params = [
         this.token.decimals,
         this.token.weight,

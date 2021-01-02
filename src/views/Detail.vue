@@ -1,7 +1,7 @@
 <template>
   <!-- 红包详情页 -->
   <div id="detail">
-    <b-overlay :show="loadding" no-wrap> </b-overlay>
+    <b-overlay :show="loadding || decimal === null" no-wrap> </b-overlay>
     <img src="../assets/detail-bg.png" class="img-fluid" alt="" />
     <b-container>
       <div class="info">
@@ -47,10 +47,10 @@
 
         <div class="money" v-else>
           <span v-if="from == 'MyPackage' || from == 'ViewAll'">
-            {{ redPackage.money }}
+            {{ redPackage.money | formatMoney(decimal, true) }}
           </span>
           <span v-else>
-            {{ getMoney | formatMoney(redPackage.decimals, true) }}
+            {{ getMoney | formatMoney(decimal, true) }}
           </span>
           <span class="token">{{ redPackage.currency }}</span>
           <p class="tips" v-if="getMoney > 0">
@@ -68,19 +68,20 @@
             .replace("{nums}", redPackage.nums)
         }},&nbsp;
         <span v-if="$i18n.locale == 'zh'">剩余</span>
-        {{
-          redPackage.remainAmount | formatMoney(redPackage.decimals, true)
-        }}/{{ redPackage.money }}
+        {{ redPackage.remainAmount | formatMoney(decimal, true) }}/{{
+          redPackage.money | formatMoney(decimal, true)
+        }}
         {{ redPackage.currency }}
       </div>
       <div class="head" v-else>
         {{ $t("red_envelope_nums").replace("{nums}", redPackage.nums) }}
         {{ $t("total") }}
-        <span @click="showMoney({ money: redPackage.moneyTa })">
-          {{ redPackage.money }}{{ redPackage.currency }}</span
+        <span @click="showMoney({ money: redPackage.money })">
+          {{ redPackage.money | formatMoney(decimal, true)
+          }}{{ redPackage.currency }}</span
         >,&nbsp;{{ $t("grab_finished") }}
       </div>
-      <ul v-if="redPackage.decimals">
+      <ul v-if="decimal">
         <li v-for="item in openList" :key="item.txhash">
           <div class="user">
             <p class="name">{{ item.nickname }}</p>
@@ -88,7 +89,7 @@
           </div>
           <div class="money">
             <p class="val" @click="showMoney(item)">
-              {{ item.money | formatMoney(redPackage.decimals, true) }}
+              {{ item.money | formatMoney(decimal, true) }}
             </p>
             <p class="best" v-if="checkBest(item)">🎉 {{ $t("best_luck") }}</p>
           </div>
@@ -100,6 +101,7 @@
 
 <script>
 import BigNumber from "bignumber.js";
+import { getDecimal } from "@/common/utils";
 export default {
   methods: {
     checkBest(item) {
@@ -112,22 +114,28 @@ export default {
     showMoney(item) {
       alert(
         new BigNumber(item.money)
-          .div(new BigNumber(10 ** this.redPackage.decimals))
+          .div(new BigNumber(10 ** this.decimal))
           .toString()
       );
+    },
+    fetchDecimal(tokenName) {
+      getDecimal(tokenName, (decimal) => {
+        this.decimal = decimal;
+      });
     },
     fetchDetail() {
       // console.log("sero:packageInfo: ", this.code);
       this.callMethod("packageInfo", [this.code]).then(
         ({ detail, nickname, note }) => {
           // canOpen,cover,
-          var decimal = new BigNumber(10).pow(detail.decimal);
+          this.fetchDecimal(detail.currency);
+
           this.redPackage = {
             currency: detail.currency,
             nickname: nickname,
             decimals: detail.decimal,
             moneyTa: detail.money,
-            money: new BigNumber(detail.money).div(decimal),
+            money: detail.money,
             note: note,
             nums: detail.nums,
             openNums: detail.openNums,
@@ -217,6 +225,7 @@ export default {
       txStatus: "0x0",
       openList: [],
       getMoney: 0,
+      decimal: null,
       redPackage: {
         currency: "",
         decimals: "",

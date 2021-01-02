@@ -100,5 +100,7 @@
   "who_can_open": "谁可以抢",
   "withdraw": "提现",
   "withdraw_all": "全部提现",
-  "withdrawal_amount": "提现金额"
+  "withdrawal_amount": "提现金额",
+  "other": "其他",
+  "input_token_name_err": "请输入正确的代币名称"
 }

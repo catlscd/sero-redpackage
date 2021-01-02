@@ -10,10 +10,21 @@ var contractList = {
       "66u1LkDvEFXTWhEJMP3aDErAy8KvMv2GEcs1WrhTzjBbH9xExRgWufYXZnft1pp6noHEhGrgJ8yve74zJXhkPu8W",
   },
   latest: {
+    version: "v1",
     address:
       "4sQ5g2wE4cGpbKanCRR9PUzc4BBN4EEea5yQb7x7b3kgAiF4BFmeujQbf1E6wN8C5TdCb8sPo6ocMgnZSeEnSvf5",
   },
 };
+
+var NODE_ENV_IS_DEV = process.env.NODE_ENV == "development";
+
+if (NODE_ENV_IS_DEV) {
+  contractList.latest = {
+    version: "v1",
+    address:
+      "ZemNuz5iFDYgoSrSyBFxgyTUVmpju8RGGbu3eQV92GAUYXeyp8DVQEUSKYF5QyTYZ2P9RquxbpTF6UUMTK8J9cD",
+  };
+}
 
 var contractAddress =
   localStorage.getItem("contractAddress") || contractList.latest.address;
@@ -40,6 +51,10 @@ if (location.hostname.indexOf("gitee") != -1) {
     url: "https://catlscd.github.io/sero-redpackage/",
     logo: "https://catlscd.github.io/sero-redpackage/img/logo.77472dad.png",
   };
+}
+
+if (NODE_ENV_IS_DEV) {
+  dapp.url = "http://localhost:8080";
 }
 
 var web3 = new Web3();

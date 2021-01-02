@@ -53,6 +53,7 @@
   </b-container>
 </template>
 <script>
+import { getDecimal } from "@/common/utils";
 export default {
   methods: {
     goDetail(item) {
@@ -74,6 +75,12 @@ export default {
               this.$t("my_open_red_envelope") + `(${total})`
             );
           }
+          for (var item of openPackages) {
+            getDecimal(item.currency, (decimal) => {
+              item.decimals = decimal;
+            });
+          }
+
           // console.log("sero:myOpenPackageList ", total, openPackages);
           this.openPackages = openPackages;
           this.loadding = false;

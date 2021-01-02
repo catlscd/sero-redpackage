@@ -100,5 +100,7 @@
   "who_can_open": "Who can open",
   "withdraw": "Withdraw",
   "withdraw_all": "Withdraw all",
-  "withdrawal_amount": "Withdrawal Amount"
+  "withdrawal_amount": "Withdrawal Amount",
+  "other": "Other",
+  "input_token_name_err": "Please enter the correct token name"
 }

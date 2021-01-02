@@ -66,9 +66,9 @@
             <b-dropdown-item href="#/friends">
               {{ $t("my_friends") }}
             </b-dropdown-item>
-            <b-dropdown-item href="#/custom-cover" v-if="$i18n.locale == 'zh'">
+            <!-- <b-dropdown-item href="#/custom-cover" v-if="$i18n.locale == 'zh'">
               红包封面定制
-            </b-dropdown-item>
+            </b-dropdown-item> -->
             <b-dropdown-item href="#/nickname">
               {{ $t("set_nickname") }}
             </b-dropdown-item>

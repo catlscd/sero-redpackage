@@ -100,6 +100,7 @@
   </b-container>
 </template>
 <script>
+import { getDecimal } from "@/common/utils";
 export default {
   methods: {
     goToSendPackage() {
@@ -147,6 +148,13 @@ export default {
             this.loadMoreDisabled = true;
           }
           this.loadding = false;
+
+          for (var item of sendPackages) {
+            getDecimal(item.currency, (decimal) => {
+              item.decimal = decimal;
+            });
+          }
+
           this.packages = this.packages.concat(sendPackages);
         }
       );

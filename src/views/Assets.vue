@@ -50,37 +50,6 @@
         </b-form-group>
       </form>
     </b-modal>
-    <!-- 
-    <b-modal
-      id="rechargeModal"
-      ref="recharge-modal"
-      title="充值"
-      ok-title="充值"
-      cancel-title="取消"
-      @show="resetRechargeModal"
-      @hidden="resetRechargeModal"
-      @ok="rechargeSubmit"
-    >
-      <form @submit.stop.prevent="rechargeSubmit">
-        <b-form-group label="余额">
-          <b-form-input readonly :value="rechargeInfo.balance"></b-form-input>
-        </b-form-group>
-        <b-form-group
-          :state="rechargeAmountState"
-          label="充值金额"
-          :invalid-feedback="rechargeAmountTips"
-        >
-          <b-input-group :append="currentToken.currency">
-            <b-form-input
-              type="number"
-              v-model="rechargeInfo.amount"
-              :state="rechargeAmountState"
-              required
-            ></b-form-input>
-          </b-input-group>
-        </b-form-group>
-      </form>
-    </b-modal> -->
 
     <b-alert show variant="secondary" v-if="txHash != ''">
       {{ $t("tx_submit_success") }}
@@ -203,6 +172,7 @@
 </template>
 <script>
 import BigNumber from "bignumber.js";
+import { getDecimal } from "@/common/utils";
 export default {
   methods: {
     changeContract() {
@@ -445,6 +415,19 @@ export default {
             };
             balances.push(item);
             balanceMap[currencyList[i]] = item;
+
+            getDecimal(item.currency, (decimal) => {
+              if (!this.tokens[item.currency]) {
+                this.tokens[item.currency] = {
+                  currency: item.currency,
+                  decimals: decimal,
+                  fees: 0,
+                  minSendAmount: 1,
+                  minWithdrawAmount: 1,
+                  weight: item.weight,
+                };
+              }
+            });
           }
           if (!balanceMap["SERO"]) {
             let item = {

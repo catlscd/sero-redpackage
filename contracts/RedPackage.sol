@@ -7,7 +7,6 @@ import "./SafeMath.sol";
 import "./Strings.sol";
 import "./HashID.sol";
 
-
 contract RedPackage is SeroInterface, Ownable, HashID {
     using SafeMath for uint256;
 
@@ -170,45 +169,31 @@ contract RedPackage is SeroInterface, Ownable, HashID {
         }
     }
 
-    //充值（用户 SERO 余额可能不够交每次提币的 SERO 手续费）
-    function recharge() public payable {
-        string memory currency = sero_msg_currency();
-        require(
-            bytes(tokenMap[currency].currency).length != 0,
-            "Unsupported token"
-        );
-
-        require(msg.value > 0, "Msg value error");
-
-        addUserCurrency(msg.sender, currency);
-
-        BalanceInfo storage b = balances[msg.sender][currency];
-        b.balance = b.balance.add(msg.value);
-    }
-
     function withdraw(string memory currency, uint256 amount) public payable {
-        require(
-            bytes(tokenMap[currency].currency).length != 0,
-            "Unsupported token"
-        );
+        // require(
+        //     bytes(tokenMap[currency].currency).length != 0,
+        //     "Unsupported token"
+        // );
 
         // 检查发送的手续费是不是 SERO
-        bool msgIsSERO = Strings.equals(
-            Strings.toSlice(sero_msg_currency()),
-            Strings.toSlice(SERO_CURRENCY)
-        );
+        bool msgIsSERO =
+            Strings.equals(
+                Strings.toSlice(sero_msg_currency()),
+                Strings.toSlice(SERO_CURRENCY)
+            );
 
         require(msgIsSERO, "Sero msg currency error");
 
-        TokenConfig memory tc = tokenMap[currency];
+        // TokenConfig memory tc = tokenMap[currency];
 
-        require(amount >= tc.minWithdrawAmount, "Amount error");
+        require(amount >= 1, "Amount error");
 
         // 如果提的不是 SERO，还需要扣除一定 SERO 手续费
-        bool isSERO = Strings.equals(
-            Strings.toSlice(currency),
-            Strings.toSlice(SERO_CURRENCY)
-        );
+        bool isSERO =
+            Strings.equals(
+                Strings.toSlice(currency),
+                Strings.toSlice(SERO_CURRENCY)
+            );
         if (!isSERO) {
             //检查 SERO 手续费是否足够
             require(msg.value >= seroFee, "SERO fees error");
@@ -220,7 +205,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
         require(balanceInfo.balance >= amount, "Currency amount error");
 
         uint256 withdrawAmount = amount;
-        uint256 fees = tc.fees;
+        uint256 fees = tokenMap[currency].fees;
         if (msg.sender == owner) {
             fees = 0;
         }
@@ -305,7 +290,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
             Package memory p = packages[up.packageId];
 
             openPackages[pos] = UserOpenPackageRet({
-                decimals: tokenMap[p.currency].decimals,
+                decimals: 0, // decimals: tokenMap[p.currency].decimals,
                 money: p.money,
                 currency: p.currency,
                 shareCode: p.shareCode,
@@ -351,7 +336,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
             Package memory p = packages[mySendPackages[msg.sender][i]];
             sendPackages[pos] = PackageRet({
                 typ: p.typ,
-                decimal: tokenMap[p.currency].decimals,
+                decimal: 0, //tokenMap[p.currency].decimals,
                 nums: p.nums,
                 openNums: p.openNums,
                 money: p.money,
@@ -423,7 +408,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
 
         detail = PackageRet({
             typ: p.typ,
-            decimal: tokenMap[p.currency].decimals,
+            decimal: 0, //tokenMap[p.currency].decimals,
             nums: p.nums,
             openNums: p.openNums,
             money: p.money,
@@ -464,21 +449,22 @@ contract RedPackage is SeroInterface, Ownable, HashID {
             } else {
                 uint256 min = 1;
                 uint256 max = p.remainAmount.div(p.nums - p.openNums).mul(2);
-                uint256 rand = uint256(
-                    keccak256(
-                        abi.encodePacked(
-                            p.remainAmount,
-                            p.openNums,
-                            userStr,
-                            nonce,
-                            salt,
-                            now,
-                            msg.sender,
-                            block.coinbase,
-                            block.number
+                uint256 rand =
+                    uint256(
+                        keccak256(
+                            abi.encodePacked(
+                                p.remainAmount,
+                                p.openNums,
+                                userStr,
+                                nonce,
+                                salt,
+                                now,
+                                msg.sender,
+                                block.coinbase,
+                                block.number
+                            )
                         )
-                    )
-                ) % 100;
+                    ) % 100;
                 uint256 val = rand.mul(max).div(100);
                 luck = val == 0 ? min : val;
             }
@@ -504,13 +490,14 @@ contract RedPackage is SeroInterface, Ownable, HashID {
 
         bytes32 txhash = sero_txHash();
 
-        UserPackageInfo memory pkgInfo = UserPackageInfo({
-            created: now,
-            money: luck,
-            packageId: packageId,
-            user: msg.sender,
-            txhash: txhash
-        });
+        UserPackageInfo memory pkgInfo =
+            UserPackageInfo({
+                created: now,
+                money: luck,
+                packageId: packageId,
+                user: msg.sender,
+                txhash: txhash
+            });
 
         openPackageInfo.push(pkgInfo);
         myOpenPackages[msg.sender].push(pkgInfo);
@@ -526,22 +513,23 @@ contract RedPackage is SeroInterface, Ownable, HashID {
         string memory cover,
         uint8 whoCanOpen
     ) public payable {
-        bool isMsgCurrency = Strings.equals(
-            Strings.toSlice(sero_msg_currency()),
-            Strings.toSlice(currency)
-        );
+        bool isMsgCurrency =
+            Strings.equals(
+                Strings.toSlice(sero_msg_currency()),
+                Strings.toSlice(currency)
+            );
         require(isMsgCurrency, "sero msg currency error");
 
-        require(
-            bytes(tokenMap[currency].currency).length != 0,
-            "Unsupported token"
-        );
+        // require(
+        //     bytes(tokenMap[currency].currency).length != 0,
+        //     "Unsupported token"
+        // );
         require(nums >= 1, "nums error");
 
         uint256 money = msg.value;
 
         // 检查最小发送金额
-        require(money >= tokenMap[currency].minSendAmount, "min money error");
+        // require(money >= tokenMap[currency].minSendAmount, "min money error");
         // 检查金额是否达到最小值
         require(money >= nums, "money error");
 
@@ -550,23 +538,24 @@ contract RedPackage is SeroInterface, Ownable, HashID {
 
         require(shareCodeMap[shareCode] == 0, "ShareCode error!");
 
-        Package memory p = Package({
-            typ: typ,
-            nums: nums,
-            money: money,
-            remainAmount: money,
-            packageId: packageId,
-            currency: currency,
-            note: note,
-            cover: cover,
-            whoCanOpen: whoCanOpen,
-            owner: msg.sender,
-            shareCode: shareCode,
-            created: now,
-            openNums: 0,
-            openMoney: 0,
-            openedList: new uint256[](0)
-        });
+        Package memory p =
+            Package({
+                typ: typ,
+                nums: nums,
+                money: money,
+                remainAmount: money,
+                packageId: packageId,
+                currency: currency,
+                note: note,
+                cover: cover,
+                whoCanOpen: whoCanOpen,
+                owner: msg.sender,
+                shareCode: shareCode,
+                created: now,
+                openNums: 0,
+                openMoney: 0,
+                openedList: new uint256[](0)
+            });
         packages.push(p);
 
         shareCodeMap[shareCode] = packageId;
