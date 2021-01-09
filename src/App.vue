@@ -211,6 +211,7 @@ export default {
       lang: [
         { locale: "en", lang: "English" },
         { locale: "zh", lang: "简体中文" },
+        { locale: "zh-hant", lang: "繁體中文" },
       ],
     };
   },
