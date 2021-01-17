@@ -369,10 +369,10 @@ export default {
   width: 100%;
 }
 
-.redpackage-cover-asnow .wrapper {
-  background: #f66654 url(./assets/cover-asnow.png) no-repeat;
+/* .redpackage-cover-xxx .wrapper {
+  background: #f66654 url(./assets/cover-xxx.png) no-repeat;
   background-size: cover;
-}
+} */
 
 .nav-white .b-icon {
   color: #fff !important;
@@ -403,7 +403,7 @@ export default {
   overflow: scroll;
 }
 #wallet-modal .wallt-item,
-#lang-modal .item {
+.lang-list .item {
   border-bottom: 1px #eee solid;
   padding: 10px;
   display: flex;
@@ -417,7 +417,7 @@ export default {
   margin: 0px;
 }
 #wallet-modal .wallt-item .check,
-#lang-modal .item .check {
+.lang-list .item .check {
   color: #28a745 !important;
   font-size: 20px;
 }

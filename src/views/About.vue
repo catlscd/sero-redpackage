@@ -67,6 +67,7 @@
 </template>
 <script>
 import BigNumber from "bignumber.js";
+import { getDecimal } from "@/common/utils";
 export default {
   methods: {
     balanceOf() {
@@ -75,16 +76,16 @@ export default {
       if (!input) {
         return;
       }
-      let val = input.split(","),
-        currency = val[0],
-        decimals = val[1];
-      if (decimals == undefined) {
-        decimals = 18;
-      }
+      let currency = input;
       this.callMethod("balanceOf", [currency], 0, "SERO").then((res) => {
-        alert(
-          new BigNumber(res.amount).div(10 ** decimals).toString() + currency
-        );
+        getDecimal(currency, (decimal) => {
+          alert(
+            new BigNumber(res.amount).div(10 ** decimal).toString() +
+              currency +
+              "." +
+              decimal
+          );
+        });
       });
     },
     setSeroFee() {

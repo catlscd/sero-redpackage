@@ -2,32 +2,32 @@ import serojs from "serojs";
 import seropp from "sero-pp";
 import Web3 from "sero-web3";
 import ABI from "./abi.json";
-
-var contractList = {
-  v0: {
-    version: "v0",
-    address:
-      "66u1LkDvEFXTWhEJMP3aDErAy8KvMv2GEcs1WrhTzjBbH9xExRgWufYXZnft1pp6noHEhGrgJ8yve74zJXhkPu8W",
-  },
-  latest: {
-    version: "v1",
-    address:
-      "4sQ5g2wE4cGpbKanCRR9PUzc4BBN4EEea5yQb7x7b3kgAiF4BFmeujQbf1E6wN8C5TdCb8sPo6ocMgnZSeEnSvf5",
-  },
-};
+import versions from "../public/versions.json";
+// "v0": {
+//   "version": "v0",
+//   "address": "66u1LkDvEFXTWhEJMP3aDErAy8KvMv2GEcs1WrhTzjBbH9xExRgWufYXZnft1pp6noHEhGrgJ8yve74zJXhkPu8W",
+//   "url": "/sero-redpackage/v0/"
+// },
 
 var NODE_ENV_IS_DEV = process.env.NODE_ENV == "development";
 
 if (NODE_ENV_IS_DEV) {
-  contractList.latest = {
-    version: "v1",
+  versions.latest = {
+    version: "v2",
     address:
-      "ZemNuz5iFDYgoSrSyBFxgyTUVmpju8RGGbu3eQV92GAUYXeyp8DVQEUSKYF5QyTYZ2P9RquxbpTF6UUMTK8J9cD",
+      // "3KS9ndfrtFmVLZsy79GTaYnkq3ok1EFzQ8rvXamxS6i4G7xeGF9hJCH6FKp2pS6z4cJ3mw1Q7wtqZfSibdwio8QQ",
+      "4wbBLVKcZBpMjiFkB66QbhdREaCpNjWTgYL4VcU3H95b1H2HzPuVFCAF8Vg8FHU8gT4cgH49kyZQbJrJ2aZjEb3m",
   };
 }
 
-var contractAddress =
-  localStorage.getItem("contractAddress") || contractList.latest.address;
+var locationHref = location.href;
+var match = locationHref.match(/\/(v\d)/);
+var version = "latest";
+if (match != null) {
+  version = match[1];
+}
+// url 中匹配版本号，然后设置合约地址
+var contractAddress = versions[version].address || versions.latest.address;
 
 const contract = serojs.callContract(ABI, contractAddress);
 
@@ -65,14 +65,14 @@ export default {
   web3: web3,
   pplang: "zh_CN",
   rpc: "http://127.0.0.1:8545",
-  contractList: contractList,
+  versions: versions,
   contractAddress: contractAddress,
   isLatestContract: function() {
-    return this.contractAddress == contractList.latest.address;
+    return this.contractAddress == versions.latest.address;
   },
-  setContractAddress(address) {
-    localStorage.setItem("contractAddress", address);
-    location.href = dapp.url;
+  changeVersion(version) {
+    localStorage.setItem("contractAddress", version.address);
+    location.href = version.url;
     // location.href = "http://192.168.37.111:8080";
   },
   init(app) {
@@ -81,7 +81,7 @@ export default {
       seropp.init(dapp, () => {
         seropp.getInfo((res) => {
           if (!res) {
-            alert("获取 SERO 账号信息失败，请在 SERO 官方钱包打开此应用！");
+            alert(app.$t("open_in_sero_wallet"));
             reject();
             return;
           }

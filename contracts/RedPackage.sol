@@ -95,8 +95,6 @@ contract RedPackage is SeroInterface, Ownable, HashID {
     mapping(string => TokenConfig) private tokenMap;
     string[] public tokens;
 
-    uint256 private nonce = 0;
-
     struct BalanceInfo {
         uint256 balance; //余额
         uint256 send; //发出的
@@ -118,10 +116,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
     //提取 Token，还要扣除一定 SERO 作为手续费,0.1
     uint256 public seroFee = 1e17;
 
-    constructor(string memory _randStr) public {
-        randStr = _randStr;
-        generateSalt();
-
+    constructor() public {
         addToken(18, 999, 1e17, 1e17, 1e16, "SERO");
 
         openPackageInfo.push(
@@ -153,6 +148,17 @@ contract RedPackage is SeroInterface, Ownable, HashID {
                 openedList: new uint256[](0)
             })
         );
+    }
+
+    bool public inited = false;
+
+    function init(string memory _randStr) public onlyOwner {
+        if (inited) {
+            return;
+        }
+        randStr = _randStr;
+        generateSalt();
+        inited = true;
     }
 
     // function() public payable {}
@@ -242,24 +248,45 @@ contract RedPackage is SeroInterface, Ownable, HashID {
     }
 
     //用户资产列表
-    function userBalances()
+    function userBalances(uint256 start, uint256 perPage)
         public
         view
         returns (
+            uint256 total,
             uint256 tokenSeroFee,
             string[] memory currencyList,
             BalanceInfo[] memory balancesList
         )
     {
+        // TODO 待测试
         tokenSeroFee = seroFee;
         UserCurrency memory userCurrency = userCurrencyList[msg.sender];
-        uint256 n = userCurrency.currency.length;
-        balancesList = new BalanceInfo[](n);
-        currencyList = new string[](n);
-        for (uint256 i = 0; i < n; i++) {
-            currencyList[i] = userCurrency.currency[i];
-            balancesList[i] = balances[msg.sender][userCurrency.currency[i]];
+        total = userCurrency.currency.length;
+        uint256 end = start.add(perPage);
+        if (end > total) {
+            end = total;
         }
+        if (perPage > total) {
+            perPage = total;
+        }
+
+        balancesList = new BalanceInfo[](perPage);
+        currencyList = new string[](perPage);
+
+        uint256 i = 0;
+        for (uint256 pos = start; pos < end; pos++) {
+            currencyList[i] = userCurrency.currency[pos];
+            balancesList[i] = balances[msg.sender][userCurrency.currency[pos]];
+            i = i + 1;
+        }
+    }
+
+    function userBalance(string memory _currency)
+        public
+        view
+        returns (BalanceInfo memory balanceInfo)
+    {
+        balanceInfo = balances[msg.sender][_currency];
     }
 
     function myOpenPackageList(uint256 start, uint256 perPage)
@@ -440,6 +467,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
         }
 
         uint256 luck = 0;
+        uint256 rand = 1;
         if (p.nums - p.openNums == 1) {
             luck = p.remainAmount;
         } else {
@@ -449,22 +477,20 @@ contract RedPackage is SeroInterface, Ownable, HashID {
             } else {
                 uint256 min = 1;
                 uint256 max = p.remainAmount.div(p.nums - p.openNums).mul(2);
-                uint256 rand =
+                rand =
                     uint256(
                         keccak256(
                             abi.encodePacked(
                                 p.remainAmount,
-                                p.openNums,
                                 userStr,
-                                nonce,
-                                salt,
-                                now,
                                 msg.sender,
-                                block.coinbase,
-                                block.number
+                                now,
+                                blockhash(block.number - 1),
+                                block.difficulty
                             )
                         )
-                    ) % 100;
+                    ) %
+                    100;
                 uint256 val = rand.mul(max).div(100);
                 luck = val == 0 ? min : val;
             }
@@ -501,7 +527,6 @@ contract RedPackage is SeroInterface, Ownable, HashID {
 
         openPackageInfo.push(pkgInfo);
         myOpenPackages[msg.sender].push(pkgInfo);
-        nonce += 1;
     }
 
     //发红包
@@ -534,7 +559,7 @@ contract RedPackage is SeroInterface, Ownable, HashID {
         require(money >= nums, "money error");
 
         uint256 packageId = packages.length;
-        string memory shareCode = encode(packageId + baseNumber);
+        string memory shareCode = encode(packageId.add(baseNumber));
 
         require(shareCodeMap[shareCode] == 0, "ShareCode error!");
 
@@ -567,7 +592,6 @@ contract RedPackage is SeroInterface, Ownable, HashID {
 
         balanceInfo.sendNums = balanceInfo.sendNums.add(1);
         balanceInfo.send = balanceInfo.send.add(money);
-        nonce += 1;
     }
 
     function addToken(
@@ -604,7 +628,6 @@ contract RedPackage is SeroInterface, Ownable, HashID {
     //设置昵称
     function setName(string memory name) public {
         nameMap[msg.sender] = name;
-        nonce += 1;
     }
 
     function getName() public view returns (string memory name) {

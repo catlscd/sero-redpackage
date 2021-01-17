@@ -99,8 +99,14 @@
   "wallet": "錢包",
   "who_can_open": "誰可以搶",
   "withdraw": "提現",
-  "withdraw_all": "全部提现",
-  "withdrawal_amount": "提现金额",
+  "withdraw_all": "全部提現",
+  "withdrawal_amount": "提現金額",
   "other": "其他",
-  "input_token_name_err": "请输入正确的代币名称"
+  "input_token_name_err": "請輸入正確的代幣名稱",
+  "open_in_sero_wallet": "獲取 SERO 賬號信息失敗，請在 SERO 官方錢包打開此應用！",
+  "version_select": "版本選擇",
+  "latest_version": "(最新版本)",
+  "switch_version_tips": "你當前訪問的是{version}版本{latest_version}，請盡快提取歷史資產，<span style=\"color:#007bff\">點擊這裡</span>切換版本",
+  "switch_version_warning": "點擊版本切換（提取歷史版本資產），如果你不知道這是什麼，請點擊關閉！",
+  "old_version_tips": "舊版本已關閉發送紅包功能！請盡快提取資產！"
 }

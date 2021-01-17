@@ -17,6 +17,7 @@ import {
   ToastPlugin,
   TooltipPlugin,
   IconsPlugin,
+  BadgePlugin,
 } from "bootstrap-vue";
 
 Vue.use(ButtonPlugin);
@@ -35,6 +36,7 @@ Vue.use(CardPlugin);
 Vue.use(ToastPlugin);
 Vue.use(FormTextareaPlugin);
 Vue.use(TooltipPlugin);
+Vue.use(BadgePlugin);
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
 

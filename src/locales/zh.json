@@ -102,5 +102,11 @@
   "withdraw_all": "全部提现",
   "withdrawal_amount": "提现金额",
   "other": "其他",
-  "input_token_name_err": "请输入正确的代币名称"
+  "input_token_name_err": "请输入正确的代币名称",
+  "open_in_sero_wallet": "获取 SERO 账号信息失败，请在 SERO 官方钱包打开此应用！",
+  "version_select": "版本选择",
+  "latest_version": "(最新版本)",
+  "switch_version_tips": "你当前访问的是{version}版本{latest_version}，请尽快提取历史资产，<span style=\"color:#007bff\">点击这里</span>切换版本",
+  "switch_version_warning": "点击版本切换（提取历史版本资产），如果你不知道这是什么，请点击关闭！",
+  "old_version_tips": "旧版本已关闭发送红包功能！请尽快提取资产！"
 }

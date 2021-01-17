@@ -25,3 +25,4 @@ TestHashID.sol
 contracts/*.py
 contracts/*.js
 *.js.map
+web/

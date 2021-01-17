@@ -102,5 +102,11 @@
   "withdraw_all": "Withdraw all",
   "withdrawal_amount": "Withdrawal Amount",
   "other": "Other",
-  "input_token_name_err": "Please enter the correct token name"
+  "input_token_name_err": "Please enter the correct token name",
+  "open_in_sero_wallet": "Failed to get SERO account information, please open this application in SERO official wallet!",
+  "version_select": "Version list",
+  "latest_version": "(Latest version)",
+  "switch_version_tips": "The current version is {version}{latest_version}, please withdraw the old version assets as soon as possible, <span style=\"color:#007bff\">click here</span> to switch version",
+  "switch_version_warning": "Click version switch (withdraw the old version assets), if you don't know what this is, please click close!",
+  "old_version_tips": "The old version has closed the function of sending red envelopes! Please withdraw assets as soon as possible!"
 }

@@ -183,7 +183,8 @@ export default {
   methods: {
     onSubmit() {
       if (!this.$contract.isLatestContract()) {
-        alert("旧版本已关闭发送红包功能！请尽快提取资产！");
+        // todo
+        alert(this.$t("old_version_tips"));
         return false;
       }
       if (!this.redPackage.msg) {
@@ -404,8 +405,6 @@ export default {
       },
       tokens: [
         // { text: "SERO", value: "SERO" },
-        // { text: "ASNOW", value: "ASNOW" },
-        // { text: "HAPY", value: "HAPY" },
       ],
       redPackage: {
         token: "SERO",

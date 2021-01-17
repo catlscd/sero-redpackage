@@ -32,6 +32,8 @@ module.exports = {
     return config;
   },
 
-  publicPath: "",
+  publicPath: process.env.NODE_ENV == "development" ? "./" : "./v2",
   productionSourceMap: false,
+  outputDir: "dist/v2",
+  indexPath: "../index.html",
 };

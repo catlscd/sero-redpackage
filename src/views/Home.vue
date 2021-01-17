@@ -69,10 +69,18 @@
               </my-img>
               &nbsp;&nbsp;
               {{
-                $t("red_envelope_from").replace("{nickname}", detail.nickname)
+                $t("red_envelope_from")
+                  .replace("{nickname}", detail.nickname)
+                  .replace("{currency}", detail.currency)
               }}
             </div>
             <p class="desc">{{ detail.note }}</p>
+            <p>
+              <span style="font-size:22px;">
+                {{ detail.money | formatMoney(detail.decimal, true) }}
+              </span>
+              <span style="font-size:13px;">{{ detail.currency }}</span>
+            </p>
             <p class="open-error" :class="{ animate: openError != '' }">
               {{ openError }}
             </p>
@@ -96,6 +104,7 @@
 
 <script>
 // @ is an alias to /src
+import { getDecimal } from "@/common/utils";
 
 export default {
   name: "Home",
@@ -143,12 +152,14 @@ export default {
       if (codeExp.test(this.code) == false) {
         var match = null;
         if (this.$i18n.locale == "zh") {
-          match = this.code.match(/红包口令：(?<code>[a-zA-Z0-9]{5,})/);
+          match = this.code.match(/红包口令：([a-zA-Z0-9]{5,})/);
+        } else if (this.$i18n.locale == "zh-hant") {
+          match = this.code.match(/紅包口令：([a-zA-Z0-9]{5,})/);
         } else if (this.$i18n.locale == "en") {
-          match = this.code.match(/Code: (?<code>[a-zA-Z0-9]{5,})/);
+          match = this.code.match(/Code:\s?([a-zA-Z0-9]{5,})/);
         }
         if (match) {
-          this.code = match.groups.code;
+          this.code = match[1];
         }
       }
       this.callMethod("packageInfo", [this.code])
@@ -165,15 +176,20 @@ export default {
           }
           this.openError = "";
           this.showPackage = true;
-          this.detail = {
-            code: detail.shareCode,
-            nickname: nickname || detail.currency,
-            note: note,
-            cover: cover,
-            currency: detail.currency,
-            nums: detail.nums,
-            openNums: detail.openNums,
-          };
+          getDecimal(detail.currency, (decimal) => {
+            this.detail = {
+              code: detail.shareCode,
+              nickname: nickname || detail.currency,
+              note: note,
+              cover: cover,
+              currency: detail.currency,
+              nums: detail.nums,
+              openNums: detail.openNums,
+              money: detail.money,
+              decimal: decimal,
+            };
+          });
+
           // console.log("sero:packageInfo ", res);
         })
         .catch(() => {

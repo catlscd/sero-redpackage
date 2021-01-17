@@ -1,0 +1,12 @@
+{
+  "v1": {
+    "version": "v1",
+    "address": "4sQ5g2wE4cGpbKanCRR9PUzc4BBN4EEea5yQb7x7b3kgAiF4BFmeujQbf1E6wN8C5TdCb8sPo6ocMgnZSeEnSvf5",
+    "url": "/sero-redpackage/v1/"
+  },
+  "latest": {
+    "version": "v2",
+    "address": "4wbBLVKcZBpMjiFkB66QbhdREaCpNjWTgYL4VcU3H95b1H2HzPuVFCAF8Vg8FHU8gT4cgH49kyZQbJrJ2aZjEb3m",
+    "url": "/sero-redpackage/"
+  }
+}

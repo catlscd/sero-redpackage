@@ -66,15 +66,50 @@
         </b-badge>
       </b-overlay>
     </b-alert>
-    <p class="text-right" v-if="$i18n.locale == 'zh'">
-      <a
-        href=""
-        @click.stop.prevent="changeContract()"
-        style="color:#ccc;font-size:12px;"
-      >
-        {{ changeContractTips }}
-      </a>
-    </p>
+
+    <b-alert show dismissible variant="danger" style="font-size:14px;">
+      <div
+        @click.stop.prevent="showVersionList()"
+        v-html="
+          $t('switch_version_tips')
+            .replace('{version}', version)
+            .replace('{latest_version}', latest_version)
+        "
+      ></div>
+    </b-alert>
+
+    <b-modal
+      ref="version-modal"
+      id="version-modal"
+      content-class="lang-modal-content"
+      size="sm"
+      centered
+      :hide-backdrop="false"
+      hide-footer
+      :title="$t('version_select')"
+    >
+      <div class="d-block">
+        <div style="font-size: 14px;margin-bottom: 5px;color: #666;">
+          {{ $t("switch_version_warning") }}
+        </div>
+        <div class="lang-list">
+          <div
+            class="item"
+            @click="changeVersion(item)"
+            v-for="item in versions"
+            :key="item.version"
+          >
+            <span>{{ item.version }}</span>
+            <div class="check">
+              <b-icon
+                icon="check-circle"
+                v-if="item.version == version"
+              ></b-icon>
+            </div>
+          </div>
+        </div>
+      </div>
+    </b-modal>
 
     <b-card-group v-if="tokens['SERO'] && tokens['SERO']['currency']">
       <b-card
@@ -146,15 +181,6 @@
             </p>
           </div>
           <div class="action">
-            <!-- <b-button
-              href="#"
-              variant="success"
-              size="sm"
-              v-if="item.currency == 'SERO' && false"
-              @click.prevent.stop="recharge(item)"
-            >
-              充值
-            </b-button> -->
             <b-button
               href="#"
               class="withdraw"
@@ -172,23 +198,15 @@
 </template>
 <script>
 import BigNumber from "bignumber.js";
+import axios from "axios";
 import { getDecimal } from "@/common/utils";
 export default {
   methods: {
-    changeContract() {
-      if (
-        !confirm(
-          "点击“确定”切换到历史版本（提取历史版本资产），如果你不知道这是什么，请点击取消！"
-        )
-      ) {
-        return;
-      }
-      let address = this.$contract.contractList.latest.address;
-      if (this.$contract.isLatestContract()) {
-        address = this.$contract.contractList.v0.address;
-      }
-
-      this.$contract.setContractAddress(address);
+    showVersionList() {
+      this.$refs["version-modal"].show();
+    },
+    changeVersion(version) {
+      this.$contract.changeVersion(version);
     },
     queryTxStatus() {
       if (!this.txHash) {
@@ -248,11 +266,6 @@ export default {
       this.withdrawAmountState = null;
       this.withdrawAmountTips = this.$t("assets_withdrawal_tips2");
     },
-    resetRechargeModal() {
-      this.rechargeInfo.amount = "";
-      this.rechargeAmountState = null;
-      this.rechargeAmountTips = this.$t("assets_withdrawal_tips2");
-    },
 
     handleOk(bvModalEvt) {
       // Prevent modal from closing
@@ -296,40 +309,6 @@ export default {
       this.$nextTick(() => {
         this.$bvModal.hide("withdrawModal");
       });
-    },
-    rechargeSubmit(e) {
-      e.preventDefault();
-      var amount = new BigNumber(this.rechargeInfo.amount);
-      if (amount.comparedTo(0) != 1) {
-        this.rechargeAmountState = false;
-        this.rechargeAmountTips = "充值金额不正确";
-        return;
-      }
-      this.rechargeAmountState = true;
-
-      amount = amount
-        .times(new BigNumber(10).pow(this.currentToken.decimals))
-        .toString(16);
-      this.executeMethod(
-        "recharge",
-        [],
-        amount,
-        this.currentToken.currency
-      ).then((res) => {
-        this.txHash = res;
-        console.log("sero:recharge ", res);
-        this.$nextTick(() => {
-          this.$bvModal.hide("rechargeModal");
-        });
-      });
-    },
-    recharge(token) {
-      this.clickToken = token;
-      this.currentToken = this.tokens[token.currency];
-      this.rechargeInfo.balance = new BigNumber(token.balance)
-        .div(new BigNumber(10).pow(this.currentToken.decimals))
-        .toString();
-      this.$bvModal.show("rechargeModal");
     },
     withdraw(token) {
       this.clickToken = token;
@@ -381,27 +360,38 @@ export default {
       this.callMethod("tokenList", []).then(({ result }) => {
         for (let i = 0; i < result.length; i++) {
           const item = result[i];
-          this.tokens[item.currency] = {
-            currency: item.currency,
-            decimals: item.decimals,
-            fees: item.fees,
-            minSendAmount: item.minSendAmount,
-            minWithdrawAmount: item.minWithdrawAmount,
-            weight: item.weight,
-          };
+          getDecimal(item.currency, (decimal) => {
+            this.tokens[item.currency] = {
+              currency: item.currency,
+              decimals: decimal,
+              fees: item.fees,
+              minSendAmount: item.minSendAmount,
+              minWithdrawAmount: item.minWithdrawAmount,
+              weight: item.weight,
+            };
+          });
         }
       });
     },
     fetchAssets() {
-      this.callMethod("userBalances", []).then(
-        ({ tokenSeroFee, currencyList, balancesList }) => {
+      this.callMethod("userBalances", [0, 100]).then(
+        ({ total, tokenSeroFee, currencyList, balancesList }) => {
           this.loadding = false;
           this.tokenSeroFee = tokenSeroFee;
-          // console.log("sero:userBalances  ", currencyList, balancesList);
+          total;
+          // if (total == 0) {
+          //   return;
+          // }
+          // console.log("sero:userBalances  ", total, currencyList, balancesList);
           let balances = [],
             balanceMap = {};
           for (let i = 0; i < currencyList.length; i++) {
             const info = balancesList[i];
+            const currency = currencyList[i];
+            if (!currency) {
+              continue;
+            }
+
             let item = {
               balance: info.balance,
               get: info.get,
@@ -409,12 +399,11 @@ export default {
               getNums: info.getNums,
               send: info.send,
               sendNums: info.sendNums,
-              currency: currencyList[i],
-              weight:
-                currencyList[i] == "SERO" ? 99999 : parseInt(info.getNums),
+              currency: currency,
+              weight: currency == "SERO" ? 99999 : parseInt(info.getNums),
             };
             balances.push(item);
-            balanceMap[currencyList[i]] = item;
+            balanceMap[currency] = item;
 
             getDecimal(item.currency, (decimal) => {
               if (!this.tokens[item.currency]) {
@@ -446,10 +435,30 @@ export default {
           balances.sort((a, b) => {
             return b.weight - a.weight;
           });
+
           this.balances = balances;
           this.balanceMap = balanceMap;
         }
       );
+    },
+    fetchVersion() {
+      var prefix = "/sero-redpackage/";
+      if (process.env.NODE_ENV == "development") {
+        prefix = "";
+      }
+      axios.get(prefix + "/versions.json").then((resp) => {
+        for (var key in resp.data) {
+          var item = resp.data[key];
+          if (item.address == this.$contract.contractAddress) {
+            this.version = item.version;
+            if (key == "latest") {
+              this.latest_version = this.$t("latest_version");
+            }
+            break;
+          }
+        }
+        this.versions = resp.data;
+      });
     },
   },
   watch: {
@@ -469,33 +478,27 @@ export default {
         .div(unit);
     },
   },
+
   created() {
     this.$root.changeNavTitle(this.$t("assets"));
     this.fetchTokens();
     this.fetchAssets();
+    this.fetchVersion();
     // console.log(this);
   },
   data() {
     return {
       loadding: true,
-      changeContractTips: this.$contract.isLatestContract()
-        ? "历史版本"
-        : "最新版本",
+      version: "",
+      versions: this.$contract.versions,
+      latest_version: "",
       withdrawAmountState: null,
       withdrawAmountTips: this.$t("assets_withdrawal_tips2"),
-      rechargeAmountState: null,
-      rechargeAmountTips: "必须输入充值金额",
       currentToken: {},
       clickToken: {},
       txStatus: "0x0",
       txHash: "",
       withdrawInfo: {
-        currency: "",
-        amount: "",
-        realAmount: "",
-        balance: 0,
-      },
-      rechargeInfo: {
         currency: "",
         amount: "",
         realAmount: "",
